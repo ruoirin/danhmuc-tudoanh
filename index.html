@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Tương tác Danh mục Tự doanh FVTPL</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A dashboard-style SPA with three main interactive views accessible via tabs: "Tổng quan" (Overview), "Chi tiết theo Công ty" (By Company), and "Chi tiết theo Cổ phiếu" (By Stock). The overview provides high-level market insights with aggregate charts. The other two views allow users to drill down into specific data slices using dropdown filters. This task-oriented structure (overall summary -> company-specific -> stock-specific) provides a logical and intuitive user flow for exploring the data from multiple perspectives, which is more effective for analysis than a single static table. -->
+    <!-- Visualization & Content Choices: 
+        - Key Metrics (KPIs): Goal: Inform. Method: Styled HTML cards. Interaction: Static display. Justification: Provides immediate, high-level summary figures.
+        - Top 10 Stocks by Value (Bar Chart): Goal: Compare. Method: Chart.js Canvas. Interaction: Tooltip on hover. Justification: Quickly identifies the most significant investments across all firms.
+        - Investment by Company (Donut Chart): Goal: Compare. Method: Chart.js Canvas. Interaction: Tooltip on hover. Justification: Shows the relative investment size of each securities firm.
+        - Top/Bottom Performing Stocks (Horizontal Bar Chart): Goal: Compare. Method: Chart.js Canvas with conditional coloring. Interaction: Tooltip on hover. Justification: Highlights the biggest winners and losers for quick performance analysis.
+        - Dropdown Filters & Dynamic Tables/Charts: Goal: Organize/Interact. Method: HTML select elements + JS filtering + Chart.js/HTML table updates. Justification: Enables powerful, user-driven exploration of company-specific portfolios and stock-specific ownership without leaving the page.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #3a3a3a;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 450px;
+        }
+        .kpi-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -4px rgba(0, 0, 0, 0.07);
+        }
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            background-color: #e9e7e2;
+            color: #5f5f5f;
+            border: 2px solid transparent;
+        }
+        .tab-btn.active {
+            background-color: #3a3a3a;
+            color: #ffffff;
+        }
+        select, input {
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Bảng điều khiển Danh mục Tự doanh FVTPL</h1>
+            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 08/08/2025</p>
+        </header>
+
+        <main>
+            <div id="kpi-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="kpi-card">
+                    <h3 class="text-md font-semibold text-gray-500">Tổng Giá trị Hiện tại</h3>
+                    <p id="total-value" class="text-2xl font-bold text-green-600 mt-2">0</p>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-md font-semibold text-gray-500">Tổng Chênh lệch Đánh giá</h3>
+                    <p id="total-diff" class="text-2xl font-bold text-blue-600 mt-2">0</p>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-md font-semibold text-gray-500">Số Công ty Phân tích</h3>
+                    <p id="company-count" class="text-2xl font-bold text-gray-700 mt-2">0</p>
+                </div>
+                <div class="kpi-card">
+                    <h3 class="text-md font-semibold text-gray-500">Số Cổ phiếu nắm giữ</h3>
+                    <p id="stock-count" class="text-2xl font-bold text-gray-700 mt-2">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-8">
+                <div class="flex flex-wrap justify-center gap-2 mb-6">
+                    <button id="overview-tab" class="tab-btn active" data-tab="overview">Tổng quan</button>
+                    <button id="company-tab" class="tab-btn" data-tab="company">Chi tiết theo Công ty</button>
+                    <button id="stock-tab" class="tab-btn" data-tab="stock">Chi tiết theo Cổ phiếu</button>
+                </div>
+
+                <div id="overview-content" class="tab-content">
+                    <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
+                        Phân tích tổng quan cung cấp cái nhìn toàn cảnh về danh mục đầu tư của các công ty chứng khoán. Biểu đồ dưới đây thể hiện các cổ phiếu được đầu tư nhiều nhất và sự phân bổ giá trị đầu tư giữa các công ty.
+                    </p>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold text-center mb-4">Top 10 Cổ phiếu theo Tổng Giá trị Đầu tư</h3>
+                            <div class="chart-container"><canvas id="topStocksChart"></canvas></div>
+                        </div>
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold text-center mb-4">Phân bổ Đầu tư theo Công ty</h3>
+                            <div class="chart-container"><canvas id="investmentByCompanyChart"></canvas></div>
+                        </div>
+                        <div class="lg:col-span-2 bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold text-center mb-4">Top 10 Cổ phiếu Lãi/Lỗ Cao nhất</h3>
+                             <p class="text-center text-sm text-gray-500 mb-4">Dựa trên chênh lệch đánh giá tài sản</p>
+                            <div class="chart-container"><canvas id="topPerformanceChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="company-content" class="tab-content hidden">
+                     <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">
+                        Chọn một công ty chứng khoán từ danh sách để xem chi tiết danh mục đầu tư, bao gồm tỷ trọng các cổ phiếu và bảng phân tích cụ thể.
+                    </p>
+                    <div class="flex justify-center mb-6">
+                        <select id="company-select" class="p-3 rounded-lg border border-gray-300 shadow-sm w-full max-w-md">
+                            <option value="">-- Chọn Công ty --</option>
+                        </select>
+                    </div>
+                    <div id="company-details" class="hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h3 id="company-chart-title" class="text-xl font-semibold text-center mb-4">Phân bổ Danh mục</h3>
+                                <div class="chart-container"><canvas id="companyPortfolioChart"></canvas></div>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg overflow-x-auto">
+                                <h3 id="company-table-title" class="text-xl font-semibold text-center mb-4">Bảng Chi tiết</h3>
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-200">
+                                        <tr>
+                                            <th class="p-3">Mã CK</th>
+                                            <th class="p-3 text-right">Giá trị Hiện tại</th>
+                                            <th class="p-3 text-right">Chênh lệch</th>
+                                            <th class="p-3 text-right">% Tăng/giảm</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="company-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="stock-content" class="tab-content hidden">
+                    <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">
+                        Chọn một mã cổ phiếu để xem các công ty chứng khoán nào đang nắm giữ và giá trị đầu tư của họ vào mã đó.
+                    </p>
+                    <div class="flex justify-center mb-6">
+                        <select id="stock-select" class="p-3 rounded-lg border border-gray-300 shadow-sm w-full max-w-md">
+                            <option value="">-- Chọn Cổ phiếu --</option>
+                        </select>
+                    </div>
+                     <div id="stock-details" class="hidden">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="bg-gray-50 p-6 rounded-lg">
+                                <h3 id="stock-chart-title" class="text-xl font-semibold text-center mb-4">Phân bổ nắm giữ theo Công ty</h3>
+                                <div class="chart-container"><canvas id="stockHoldersChart"></canvas></div>
+                            </div>
+                            <div class="bg-gray-50 p-6 rounded-lg overflow-x-auto">
+                                <h3 id="stock-table-title" class="text-xl font-semibold text-center mb-4">Bảng Chi tiết</h3>
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-200">
+                                        <tr>
+                                            <th class="p-3">Công ty</th>
+                                            <th class="p-3 text-right">Giá trị Hiện tại</th>
+                                            <th class="p-3 text-right">Chênh lệch</th>
+                                            <th class="p-3 text-right">% Tăng/giảm</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="stock-table-body"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const portfolioData = [
+                { stock: "ACB", company: "SSI", currentValue: 20107500000, diff: 2342682300, change: 13.32 },
+                { stock: "ACB", company: "SSI (phòng ngừa)", currentValue: 129405075000, diff: 15225061800, change: 13.32 },
+                { stock: "ACB", company: "Rồng Việt (VDS)", currentValue: 142906750000, diff: 16817587300, change: 13.32 },
+                { stock: "EIB", company: "Vietinbank (CTS)", currentValue: 334130610000, diff: 51933110000, change: 18.40 },
+                { stock: "FPT", company: "HSC", currentValue: 914728000000, diff: 23653660000, change: 2.58 },
+                { stock: "FPT", company: "SHS", currentValue: 259606520000, diff: 6620696000, change: 2.58 },
+                { stock: "FPT", company: "Agribank (AGR)", currentValue: 9074850000, diff: 209850000, change: 2.34 },
+                { stock: "GEX", company: "SHS", currentValue: 442000000000, diff: 15260203000, change: 3.58 },
+                { stock: "GEX", company: "Vietinbank (CTS)", currentValue: 8139600000, diff: 297194000, change: 3.79 },
+                { stock: "GMD", company: "HSC", currentValue: 37680000000, diff: 2112030000, change: 6.00 },
+                { stock: "HPG", company: "HSC", currentValue: 320135200000, diff: 61159072000, change: 23.62 },
+                { stock: "HPG", company: "SSI", currentValue: 42739200000, diff: 8164898100, change: 23.62 },
+                { stock: "HPG", company: "SSI (phòng ngừa)", currentValue: 158116000000, diff: 30201885900, change: 23.62 },
+                { stock: "HPG", company: "TCI", currentValue: 14479892000, diff: 2766692000, change: 23.62 },
+                { stock: "HPG", company: "BSI", currentValue: 141108800000, diff: 26972155800, change: 23.62 },
+                { stock: "HPG", company: "SHS", currentValue: 121228800000, diff: 23164800000, change: 23.62 },
+                { stock: "HPG", company: "Agribank (AGR)", currentValue: 28837200000, diff: 11812200000, change: 69.39 },
+                { stock: "HSG", company: "VNDirect (VND)", currentValue: 498901370000, diff: 54001184400, change: 12.06 },
+                { stock: "HSG", company: "Rồng Việt (VDS)", currentValue: 110610230000, diff: 13010530000, change: 13.33 },
+                { stock: "KBC", company: "Rồng Việt (VDS)", currentValue: 516779020000, diff: 225241470000, change: 77.29 },
+                { stock: "MBB", company: "HSC", currentValue: 185865000000, diff: 28801308000, change: 18.41 },
+                { stock: "MSH", company: "FPT (FTS)", currentValue: 554818020000, diff: 18861108750, change: 3.51 },
+                { stock: "MSN", company: "SSI", currentValue: 41801500000, diff: 237340000, change: 0.66 },
+                { stock: "MWG", company: "HSC", currentValue: 422877600000, diff: 36407950000, change: 9.42 },
+                { stock: "MWG", company: "Rồng Việt (VDS)", currentValue: 153144000000, diff: 13183600000, change: 9.42 },
+                { stock: "NAF", company: "Agribank (AGR)", currentValue: 11460000000, diff: 1720000000, change: 17.65 },
+                { stock: "PET", company: "Vietinbank (CTS)", currentValue: 124119000000, diff: 36308240000, change: 41.35 },
+                { stock: "SSI", company: "HSC", currentValue: 47713450000, diff: 14990890000, change: 45.79 },
+                { stock: "SSI", company: "Agribank (AGR)", currentValue: 29223600000, diff: 8228600000, change: 39.22 },
+                { stock: "STB", company: "SSI", currentValue: 171952200000, diff: 22568240000, change: 14.90 },
+                { stock: "TCB", company: "HSC", currentValue: 1341830000000, diff: 121936520000, change: 10.03 },
+                { stock: "TCB", company: "TCI", currentValue: 11291957600, diff: 1031957600, change: 10.03 },
+                { stock: "TCB", company: "SHS", currentValue: 195502345000, diff: 17662345000, change: 10.03 },
+                { stock: "VHC", company: "BSI", currentValue: 74646000000, diff: 618000000, change: 0.86 },
+                { stock: "VHM", company: "DNSE", currentValue: 39076015200, diff: 7629015200, change: 24.25 },
+                { stock: "VHM", company: "SSI", currentValue: 171152040000, diff: 33410345000, change: 24.25 },
+                { stock: "VIB", company: "DNSE", currentValue: 92300250000, diff: 19085536800, change: 26.16 },
+                { stock: "VIB", company: "HSC", currentValue: 102155850000, diff: 21258870000, change: 26.16 },
+                { stock: "VIB", company: "TCI", currentValue: 20776500000, diff: 4306500000, change: 26.16 },
+                { stock: "VND", company: "Agribank (AGR)", currentValue: 15904710000, diff: 2144710000, change: 15.54 },
+                { stock: "VPB", company: "HSC", currentValue: 105807900000, diff: 39215300000, change: 58.87 },
+                { stock: "VPB", company: "SSI", currentValue: 786606000000, diff: 291424732500, change: 58.87 },
+                { stock: "VPB", company: "VNDirect (VND)", currentValue: 748460200000, diff: 277342197000, change: 59.73 },
+                { stock: "VPB", company: "BSI", currentValue: 129898387500, diff: 48128073000, change: 58.87 },
+                { stock: "VPB", company: "SHS", currentValue: 457987155000, diff: 170450905000, change: 58.87 },
+                { stock: "VPB", company: "Vietinbank (CTS)", currentValue: 102238000000, diff: 37865400000, change: 58.87 },
+                { stock: "VSC", company: "Vietinbank (CTS)", currentValue: 268219000000, diff: 95581187500, change: 55.42 },
+                { stock: "VIX", company: "Vietinbank (CTS)", currentValue: 233067300000, diff: 127573800000, change: 120.93 }
+            ];
+
+            const uniqueCompanies = [...new Set(portfolioData.map(item => item.company.replace(/ \(.*/, '')))];
+            const uniqueStocks = [...new Set(portfolioData.map(item => item.stock))];
+
+            const companySelect = document.getElementById('company-select');
+            const stockSelect = document.getElementById('stock-select');
+            
+            uniqueCompanies.sort().forEach(company => {
+                const option = document.createElement('option');
+                option.value = company;
+                option.textContent = company;
+                companySelect.appendChild(option);
+            });
+
+            uniqueStocks.sort().forEach(stock => {
+                const option = document.createElement('option');
+                option.value = stock;
+                option.textContent = stock;
+                stockSelect.appendChild(option);
+            });
+
+            const formatCurrency = (value) => {
+                if (Math.abs(value) >= 1e12) {
+                    return (value / 1e12).toFixed(2) + ' nghìn tỷ';
+                }
+                if (Math.abs(value) >= 1e9) {
+                    return (value / 1e9).toFixed(2) + ' tỷ';
+                }
+                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+            };
+
+            const chartInstances = {};
+
+            function renderChart(canvasId, config) {
+                if (chartInstances[canvasId]) {
+                    chartInstances[canvasId].destroy();
+                }
+                const ctx = document.getElementById(canvasId).getContext('2d');
+                chartInstances[canvasId] = new Chart(ctx, config);
+            }
+
+            function setupKPIs() {
+                const totalValue = portfolioData.reduce((sum, item) => sum + item.currentValue, 0);
+                const totalDiff = portfolioData.reduce((sum, item) => sum + item.diff, 0);
+                document.getElementById('total-value').textContent = formatCurrency(totalValue);
+                document.getElementById('total-diff').textContent = formatCurrency(totalDiff);
+                document.getElementById('company-count').textContent = uniqueCompanies.length;
+                document.getElementById('stock-count').textContent = uniqueStocks.length;
+            }
+
+            function setupOverview() {
+                const stockTotals = portfolioData.reduce((acc, item) => {
+                    acc[item.stock] = (acc[item.stock] || 0) + item.currentValue;
+                    return acc;
+                }, {});
+
+                const topStocks = Object.entries(stockTotals)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 10);
+
+                renderChart('topStocksChart', {
+                    type: 'bar',
+                    data: {
+                        labels: topStocks.map(item => item[0]),
+                        datasets: [{
+                            label: 'Tổng Giá trị Đầu tư',
+                            data: topStocks.map(item => item[1]),
+                            backgroundColor: '#60a5fa',
+                            borderColor: '#3b82f6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                });
+
+                const companyTotals = portfolioData.reduce((acc, item) => {
+                    const companyName = item.company.replace(/ \(.*/, '');
+                    acc[companyName] = (acc[companyName] || 0) + item.currentValue;
+                    return acc;
+                }, {});
+
+                renderChart('investmentByCompanyChart', {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(companyTotals),
+                        datasets: [{
+                            data: Object.values(companyTotals),
+                            backgroundColor: ['#34d399', '#f87171', '#fbbf24', '#a78bfa', '#60a5fa', '#fb923c', '#f472b6', '#2dd4bf'],
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true }
+                });
+                
+                const performanceByStock = portfolioData.reduce((acc, item) => {
+                    acc[item.stock] = (acc[item.stock] || 0) + item.diff;
+                    return acc;
+                }, {});
+
+                const sortedPerformance = Object.entries(performanceByStock).sort(([, a], [, b]) => b - a);
+                const topPerformers = [...sortedPerformance.slice(0, 5), ...sortedPerformance.slice(-5)].sort(([, a], [, b]) => b - a);
+
+                renderChart('topPerformanceChart', {
+                    type: 'bar',
+                    data: {
+                        labels: topPerformers.map(item => item[0]),
+                        datasets: [{
+                            label: 'Chênh lệch',
+                            data: topPerformers.map(item => item[1]),
+                            backgroundColor: topPerformers.map(item => item[1] > 0 ? 'rgba(52, 211, 153, 0.7)' : 'rgba(248, 113, 113, 0.7)'),
+                            borderColor: topPerformers.map(item => item[1] > 0 ? '#10b981' : '#ef4444'),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                });
+            }
+
+            function handleCompanyChange() {
+                const selectedCompany = companySelect.value;
+                const detailsDiv = document.getElementById('company-details');
+                if (!selectedCompany) {
+                    detailsDiv.classList.add('hidden');
+                    return;
+                }
+                detailsDiv.classList.remove('hidden');
+
+                const companyData = portfolioData.filter(item => item.company.startsWith(selectedCompany));
+                
+                document.getElementById('company-chart-title').textContent = `Phân bổ Danh mục của ${selectedCompany}`;
+                document.getElementById('company-table-title').textContent = `Bảng Chi tiết của ${selectedCompany}`;
+
+                renderChart('companyPortfolioChart', {
+                    type: 'pie',
+                    data: {
+                        labels: companyData.map(d => d.stock),
+                        datasets: [{
+                            data: companyData.map(d => d.currentValue),
+                            backgroundColor: ['#34d399', '#f87171', '#fbbf24', '#a78bfa', '#60a5fa', '#fb923c', '#f472b6', '#2dd4bf'],
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true }
+                });
+
+                const tableBody = document.getElementById('company-table-body');
+                tableBody.innerHTML = '';
+                companyData.sort((a,b) => b.currentValue - a.currentValue).forEach(item => {
+                    const row = `<tr>
+                        <td class="p-3 font-semibold">${item.stock}</td>
+                        <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
+                        <td class="p-3 text-right ${item.diff >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(item.diff)}</td>
+                        <td class="p-3 text-right font-medium ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}">${item.change.toFixed(2)}%</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            function handleStockChange() {
+                const selectedStock = stockSelect.value;
+                const detailsDiv = document.getElementById('stock-details');
+                if (!selectedStock) {
+                    detailsDiv.classList.add('hidden');
+                    return;
+                }
+                detailsDiv.classList.remove('hidden');
+
+                const stockData = portfolioData.filter(item => item.stock === selectedStock);
+                
+                document.getElementById('stock-chart-title').textContent = `Phân bổ nắm giữ ${selectedStock} theo Công ty`;
+                document.getElementById('stock-table-title').textContent = `Bảng Chi tiết nắm giữ ${selectedStock}`;
+
+                renderChart('stockHoldersChart', {
+                    type: 'bar',
+                    data: {
+                        labels: stockData.map(d => d.company),
+                        datasets: [{
+                            label: `Giá trị nắm giữ ${selectedStock}`,
+                            data: stockData.map(d => d.currentValue),
+                            backgroundColor: '#a78bfa',
+                            borderColor: '#8b5cf6',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                });
+
+                const tableBody = document.getElementById('stock-table-body');
+                tableBody.innerHTML = '';
+                stockData.sort((a,b) => b.currentValue - a.currentValue).forEach(item => {
+                    const row = `<tr>
+                        <td class="p-3 font-semibold">${item.company}</td>
+                        <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
+                        <td class="p-3 text-right ${item.diff >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(item.diff)}</td>
+                        <td class="p-3 text-right font-medium ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}">${item.change.toFixed(2)}%</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                    document.getElementById(`${button.dataset.tab}-content`).classList.remove('hidden');
+                });
+            });
+
+            companySelect.addEventListener('change', handleCompanyChange);
+            stockSelect.addEventListener('change', handleStockChange);
+
+            setupKPIs();
+            setupOverview();
+        });
+    </script>
+</body>
+</html>
