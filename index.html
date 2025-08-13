@@ -9,16 +9,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutral Harmony -->
-    <!-- Application Structure Plan: A dashboard-style SPA with three main interactive views accessible via tabs: "Tổng quan" (Overview), "Chi tiết theo Công ty" (By Company), and "Chi tiết theo Cổ phiếu" (By Stock). The overview provides high-level market insights with aggregate charts. The other two views allow users to drill down into specific data slices using dropdown filters. This task-oriented structure (overall summary -> company-specific -> stock-specific) provides a logical and intuitive user flow for exploring the data from multiple perspectives, which is more effective for analysis than a single static table. -->
-    <!-- Visualization & Content Choices: 
-        - Key Metrics (KPIs): Goal: Inform. Method: Styled HTML cards. Interaction: Static display. Justification: Provides immediate, high-level summary figures.
-        - Top 10 Stocks by Value (Bar Chart): Goal: Compare. Method: Chart.js Canvas. Interaction: Tooltip on hover. Justification: Quickly identifies the most significant investments across all firms.
-        - Investment by Company (Donut Chart): Goal: Compare. Method: Chart.js Canvas. Interaction: Tooltip on hover. Justification: Shows the relative investment size of each securities firm.
-        - Top/Bottom Performing Stocks (Horizontal Bar Chart): Goal: Compare. Method: Chart.js Canvas with conditional coloring. Interaction: Tooltip on hover. Justification: Highlights the biggest winners and losers for quick performance analysis.
-        - Dropdown Filters & Dynamic Tables/Charts: Goal: Organize/Interact. Method: HTML select elements + JS filtering + Chart.js/HTML table updates. Justification: Enables powerful, user-driven exploration of company-specific portfolios and stock-specific ownership without leaving the page.
+    <!-- Cấu trúc ứng dụng: Một SPA kiểu bảng điều khiển với ba chế độ xem tương tác chính có thể truy cập qua các tab: "Tổng quan", "Chi tiết theo Công ty", và "Chi tiết theo Cổ phiếu". Tổng quan cung cấp thông tin chi tiết tổng hợp về thị trường với các biểu đồ tổng quát. Hai chế độ xem còn lại cho phép người dùng xem sâu hơn vào các lát dữ liệu cụ thể bằng cách sử dụng các bộ lọc thả xuống. Cấu trúc theo định hướng tác vụ này (tóm tắt tổng thể -> cụ thể theo công ty -> cụ thể theo cổ phiếu) cung cấp một luồng người dùng logic và trực quan để khám phá dữ liệu từ nhiều góc độ, hiệu quả hơn cho việc phân tích so với một bảng tĩnh duy nhất. -->
+    <!-- Lựa chọn trực quan hóa & nội dung: 
+        - Các chỉ số chính (KPI): Mục tiêu: Thông báo. Phương pháp: Thẻ HTML được tạo kiểu. Tương tác: Hiển thị tĩnh. Lý do: Cung cấp ngay lập tức các số liệu tóm tắt cấp cao.
+        - Tổng giá trị theo Công ty (Biểu đồ thanh): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Nhanh chóng xác định tổng giá trị đầu tư của mỗi công ty chứng khoán.
+        - Tổng chênh lệch đánh giá theo Công ty (Biểu đồ thanh): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Nhanh chóng xác định hiệu quả đầu tư tổng thể của mỗi công ty.
+        - Top/Bottom cổ phiếu có hiệu suất cao nhất (Biểu đồ thanh ngang): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js với màu sắc có điều kiện. Tương tác: Gợi ý khi di chuột. Lý do: Nổi bật những cổ phiếu tăng và giảm lớn nhất để phân tích hiệu suất nhanh chóng.
+        - Phân bổ đầu tư theo Công ty (Biểu đồ tròn): Mục tiêu: So sánh/Phân bổ. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Cho thấy quy mô đầu tư tương đối của từng công ty chứng khoán.
+        - Bộ lọc thả xuống & Bảng/Biểu đồ động: Mục tiêu: Tổ chức/Tương tác. Phương pháp: Các phần tử chọn HTML + lọc JS + cập nhật bảng/biểu đồ Chart.js/HTML. Lý do: Cho phép khám phá mạnh mẽ, do người dùng điều khiển các danh mục đầu tư cụ thể của công ty và quyền sở hữu cụ thể của cổ phiếu mà không cần rời khỏi trang.
     -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -62,6 +61,28 @@
         select, input {
             background-color: #ffffff;
             border: 1px solid #dcdcdc;
+            border-radius: 0.5rem;
+        }
+        table {
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+        th, td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        thead th {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        tfoot {
+            background-color: #d1d5db;
         }
     </style>
 </head>
@@ -70,10 +91,11 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Bảng điều khiển Danh mục Tự doanh FVTPL</h1>
-            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 12/08/2025</p>
+            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 13/08/2025</p>
         </header>
 
         <main>
+            <!-- KPI Section -->
             <div id="kpi-section" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="kpi-card">
                     <h3 class="text-md font-semibold text-gray-500">Tổng Giá trị Hiện tại</h3>
@@ -93,13 +115,15 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-8">
-                <div class="flex flex-wrap justify-center gap-2 mb-6">
+            <!-- Main Tabbed Content -->
+            <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8">
+                <div class="flex flex-wrap justify-center gap-2 mb-6 border-b pb-4">
                     <button id="overview-tab" class="tab-btn active" data-tab="overview">Tổng quan</button>
                     <button id="company-tab" class="tab-btn" data-tab="company">Chi tiết theo Công ty</button>
                     <button id="stock-tab" class="tab-btn" data-tab="stock">Chi tiết theo Cổ phiếu</button>
                 </div>
 
+                <!-- Overview Tab Content -->
                 <div id="overview-content" class="tab-content">
                     <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
                         Phân tích tổng quan cung cấp cái nhìn toàn cảnh về danh mục đầu tư của các công ty chứng khoán. Các biểu đồ dưới đây giúp bạn dễ dàng so sánh tổng giá trị và chênh lệch đánh giá của từng công ty.
@@ -115,18 +139,19 @@
                         </div>
                         <div class="lg:col-span-2 bg-gray-50 p-6 rounded-lg">
                             <h3 class="text-xl font-semibold text-center mb-4">Top 10 Cổ phiếu Lãi/Lỗ Cao nhất</h3>
-                             <p class="text-center text-sm text-gray-500 mb-4">Dựa trên chênh lệch đánh giá tài sản</p>
+                            <p class="text-center text-sm text-gray-500 mb-4">Dựa trên chênh lệch đánh giá tài sản</p>
                             <div class="chart-container"><canvas id="topPerformanceChart"></canvas></div>
                         </div>
-                         <div class="lg:col-span-2 bg-gray-50 p-6 rounded-lg">
+                        <div class="lg:col-span-2 bg-gray-50 p-6 rounded-lg">
                             <h3 class="text-xl font-semibold text-center mb-4">Phân bổ Đầu tư theo Công ty</h3>
                             <div class="chart-container"><canvas id="investmentByCompanyChart"></canvas></div>
                         </div>
                     </div>
                 </div>
 
+                <!-- By Company Tab Content -->
                 <div id="company-content" class="tab-content hidden">
-                     <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">
+                    <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">
                         Chọn một công ty chứng khoán từ danh sách để xem chi tiết danh mục đầu tư, bao gồm tỷ trọng các cổ phiếu và bảng phân tích cụ thể.
                     </p>
                     <div class="flex justify-center mb-6">
@@ -135,23 +160,24 @@
                         </select>
                     </div>
                     <div id="company-details" class="hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="grid grid-cols-1 gap-8">
                             <div class="bg-gray-50 p-6 rounded-lg">
                                 <h3 id="company-chart-title" class="text-xl font-semibold text-center mb-4">Phân bổ Danh mục</h3>
                                 <div class="chart-container"><canvas id="companyPortfolioChart"></canvas></div>
                             </div>
                             <div class="bg-gray-50 p-6 rounded-lg overflow-x-auto">
                                 <h3 id="company-table-title" class="text-xl font-semibold text-center mb-4">Bảng Chi tiết</h3>
-                                <table class="w-full text-left">
+                                <table class="w-full text-left rounded-lg overflow-hidden">
                                     <thead class="bg-gray-200">
                                         <tr>
                                             <th class="p-3">Mã CK</th>
+                                            <th class="p-3 text-right">Giá trị 30/06</th>
                                             <th class="p-3 text-right">Giá trị Hiện tại</th>
                                             <th class="p-3 text-right">Chênh lệch</th>
                                             <th class="p-3 text-right">% Tăng/giảm</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="company-table-body"></tbody>
+                                    <tbody id="company-table-body" class="bg-white"></tbody>
                                     <tfoot id="company-table-footer" class="bg-gray-200 font-bold"></tfoot>
                                 </table>
                             </div>
@@ -159,6 +185,7 @@
                     </div>
                 </div>
 
+                <!-- By Stock Tab Content -->
                 <div id="stock-content" class="tab-content hidden">
                     <p class="text-center text-gray-600 mb-6 max-w-3xl mx-auto">
                         Chọn một mã cổ phiếu để xem các công ty chứng khoán nào đang nắm giữ và giá trị đầu tư của họ vào mã đó.
@@ -168,24 +195,25 @@
                             <option value="">-- Chọn Cổ phiếu --</option>
                         </select>
                     </div>
-                     <div id="stock-details" class="hidden">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div id="stock-details" class="hidden">
+                        <div class="grid grid-cols-1 gap-8">
                             <div class="bg-gray-50 p-6 rounded-lg">
                                 <h3 id="stock-chart-title" class="text-xl font-semibold text-center mb-4">Phân bổ nắm giữ theo Công ty</h3>
                                 <div class="chart-container"><canvas id="stockHoldersChart"></canvas></div>
                             </div>
                             <div class="bg-gray-50 p-6 rounded-lg overflow-x-auto">
                                 <h3 id="stock-table-title" class="text-xl font-semibold text-center mb-4">Bảng Chi tiết</h3>
-                                <table class="w-full text-left">
+                                <table class="w-full text-left rounded-lg overflow-hidden">
                                     <thead class="bg-gray-200">
                                         <tr>
                                             <th class="p-3">Công ty</th>
+                                            <th class="p-3 text-right">Giá trị 30/06</th>
                                             <th class="p-3 text-right">Giá trị Hiện tại</th>
                                             <th class="p-3 text-right">Chênh lệch</th>
                                             <th class="p-3 text-right">% Tăng/giảm</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="stock-table-body"></tbody>
+                                    <tbody id="stock-table-body" class="bg-white"></tbody>
                                     <tfoot id="stock-table-footer" class="bg-gray-200 font-bold"></tfoot>
                                 </table>
                             </div>
@@ -198,105 +226,131 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Dữ liệu giả lập
             const portfolioData = [
-                { stock: "ACB", company: "SSI", currentValue: 20107500000, diff: 2342682300, change: 13.32 },
-                { stock: "ACB", company: "SSI (phòng ngừa)", currentValue: 129405075000, diff: 15225061800, change: 13.32 },
-                { stock: "ACB", company: "Rồng Việt (VDS)", currentValue: 142906750000, diff: 16817587300, change: 13.32 },
-                { stock: "EIB", company: "Vietinbank (CTS)", currentValue: 334130610000, diff: 51933110000, change: 18.40 },
-                { stock: "FPT", company: "HSC", currentValue: 914728000000, diff: 23653660000, change: 2.58 },
-                { stock: "FPT", company: "SHS", currentValue: 259606520000, diff: 6620696000, change: 2.58 },
-                { stock: "FPT", company: "Agribank (AGR)", currentValue: 9074850000, diff: 209850000, change: 2.34 },
-                { stock: "GEX", company: "SHS", currentValue: 442000000000, diff: 15260203000, change: 3.58 },
-                { stock: "GEX", company: "Vietinbank (CTS)", currentValue: 8139600000, diff: 297194000, change: 3.79 },
-                { stock: "GMD", company: "HSC", currentValue: 37680000000, diff: 2112030000, change: 6.00 },
-                { stock: "HPG", company: "HSC", currentValue: 320135200000, diff: 61159072000, change: 23.62 },
-                { stock: "HPG", company: "SSI", currentValue: 42739200000, diff: 8164898100, change: 23.62 },
-                { stock: "HPG", company: "SSI (phòng ngừa)", currentValue: 158116000000, diff: 30201885900, change: 23.62 },
-                { stock: "HPG", company: "TCI", currentValue: 14479892000, diff: 2766692000, change: 23.62 },
-                { stock: "HPG", company: "BSI", currentValue: 141108800000, diff: 26972155800, change: 23.62 },
-                { stock: "HPG", company: "SHS", currentValue: 121228800000, diff: 23164800000, change: 23.62 },
-                { stock: "HPG", company: "Agribank (AGR)", currentValue: 28837200000, diff: 11812200000, change: 69.39 },
-                { stock: "HSG", company: "VNDirect (VND)", currentValue: 498901370000, diff: 54001184400, change: 12.06 },
-                { stock: "HSG", company: "Rồng Việt (VDS)", currentValue: 110610230000, diff: 13010530000, change: 13.33 },
-                { stock: "KBC", company: "Rồng Việt (VDS)", currentValue: 516779020000, diff: 225241470000, change: 77.29 },
-                { stock: "MBB", company: "HSC", currentValue: 185865000000, diff: 28801308000, change: 18.41 },
-                { stock: "MSH", company: "FPT (FTS)", currentValue: 554818020000, diff: 18861108750, change: 3.51 },
-                { stock: "MSN", company: "SSI", currentValue: 41801500000, diff: 237340000, change: 0.66 },
-                { stock: "MWG", company: "HSC", currentValue: 422877600000, diff: 36407950000, change: 9.42 },
-                { stock: "MWG", company: "Rồng Việt (VDS)", currentValue: 153144000000, diff: 13183600000, change: 9.42 },
-                { stock: "NAF", company: "Agribank (AGR)", currentValue: 11460000000, diff: 1720000000, change: 17.65 },
-                { stock: "PET", company: "Vietinbank (CTS)", currentValue: 124119000000, diff: 36308240000, change: 41.35 },
-                { stock: "SSI", company: "HSC", currentValue: 47713450000, diff: 14990890000, change: 45.79 },
-                { stock: "SSI", company: "Agribank (AGR)", currentValue: 29223600000, diff: 8228600000, change: 39.22 },
-                { stock: "STB", company: "SSI", currentValue: 171952200000, diff: 22568240000, change: 14.90 },
-                { stock: "TCB", company: "HSC", currentValue: 1341830000000, diff: 121936520000, change: 10.03 },
-                { stock: "TCB", company: "TCI", currentValue: 11291957600, diff: 1031957600, change: 10.03 },
-                { stock: "TCB", company: "SHS", currentValue: 195502345000, diff: 17662345000, change: 10.03 },
-                { stock: "VHC", company: "BSI", currentValue: 74646000000, diff: 618000000, change: 0.86 },
-                { stock: "VHM", company: "DNSE", currentValue: 39076015200, diff: 7629015200, change: 24.25 },
-                { stock: "VHM", company: "SSI", currentValue: 171152040000, diff: 33410345000, change: 24.25 },
-                { stock: "VIB", company: "DNSE", currentValue: 92300250000, diff: 19085536800, change: 26.16 },
-                { stock: "VIB", company: "HSC", currentValue: 102155850000, diff: 21258870000, change: 26.16 },
-                { stock: "VIB", company: "TCI", currentValue: 20776500000, diff: 4306500000, change: 26.16 },
-                { stock: "VND", company: "Agribank (AGR)", currentValue: 15904710000, diff: 2144710000, change: 15.54 },
-                { stock: "VPB", company: "HSC", currentValue: 105807900000, diff: 39215300000, change: 58.87 },
-                { stock: "VPB", company: "SSI", currentValue: 786606000000, diff: 291424732500, change: 58.87 },
-                { stock: "VPB", company: "VNDirect (VND)", currentValue: 748460200000, diff: 277342197000, change: 59.73 },
-                { stock: "VPB", company: "BSI", currentValue: 129898387500, diff: 48128073000, change: 58.87 },
-                { stock: "VPB", company: "SHS", currentValue: 457987155000, diff: 170450905000, change: 58.87 },
-                { stock: "VPB", company: "Vietinbank (CTS)", currentValue: 102238000000, diff: 37865400000, change: 58.87 },
-                { stock: "VSC", company: "Vietinbank (CTS)", currentValue: 268219000000, diff: 95581187500, change: 55.42 },
-                { stock: "VIX", company: "Vietinbank (CTS)", currentValue: 233067300000, diff: 127573800000, change: 120.93 },
-                { stock: "EIB", company: "VIX", currentValue: 2337986947200, diff: 402370942000, change: 20.78 },
-                { stock: "VSC", company: "VIX", currentValue: 1887062500000, diff: 793656250000, change: 72.58 },
-                { stock: "HAH", company: "VIX", currentValue: 1150706734053, diff: 214670734053, change: 22.93 },
-                { stock: "GEX", company: "VIX", currentValue: 1368268356000, diff: 497975218000, change: 57.22 },
-                { stock: "BSR", company: "VIX", currentValue: 905063085000, diff: 201125130000, change: 28.57 },
-                { stock: "PC1", company: "VIX", currentValue: 583740000000, diff: 130410000000, change: 28.77 },
-                { stock: "SHS", company: "VIX", currentValue: 909634000000, diff: 418660000000, change: 85.27 },
-                { stock: "GEE", company: "VIX", currentValue: 616336200000, diff: 150978480000, change: 32.44 }
+                { stock: "ACB", company: "SSI", initialValue: 17764817700, currentValue: 20435700000, diff: 2342682300, change: 14.49 },
+                { stock: "ACB", company: "SSI (phòng ngừa)", initialValue: 114180013200, currentValue: 131758525000, diff: 15225061800, change: 14.49 },
+                { stock: "ACB", company: "Rồng Việt (VDS)", initialValue: 126089162700, currentValue: 146200000000, diff: 16817587300, change: 14.49 },
+                { stock: "EIB", company: "Vietinbank (CTS)", initialValue: 282197500000, currentValue: 337886100000, diff: 51933110000, change: 19.73 },
+                { stock: "FPT", company: "HSC", initialValue: 891074340000, currentValue: 920088000000, diff: 23653660000, change: 3.17 },
+                { stock: "FPT", company: "SHS", initialValue: 252985824000, currentValue: 261174920000, diff: 6620696000, change: 3.17 },
+                { stock: "FPT", company: "Agribank (AGR)", initialValue: 8865000000, currentValue: 9122750000, diff: 209850000, change: 2.82 },
+                { stock: "GEX", company: "SHS", initialValue: 426739797000, currentValue: 455000000000, diff: 15260203000, change: 6.62 },
+                { stock: "GEX", company: "Vietinbank (CTS)", initialValue: 7842406000, currentValue: 8350000000, diff: 297194000, change: 6.99 },
+                { stock: "GMD", company: "HSC", initialValue: 35567970000, currentValue: 38300000000, diff: 2112030000, change: 7.75 },
+                { stock: "HPG", company: "HSC", initialValue: 258976128000, currentValue: 325884800000, diff: 61159072000, change: 25.83 },
+                { stock: "HPG", company: "SSI", initialValue: 34574301900, currentValue: 43372800000, diff: 8164898100, change: 25.83 },
+                { stock: "HPG", company: "SSI (phòng ngừa)", initialValue: 127914114100, currentValue: 160935600000, diff: 30201885900, change: 25.83 },
+                { stock: "HPG", company: "TCI", initialValue: 11713200000, currentValue: 14742512000, diff: 2766692000, change: 25.83 },
+                { stock: "HPG", company: "BSI", initialValue: 114136644200, currentValue: 143788800000, diff: 26972155800, change: 25.83 },
+                { stock: "HPG", company: "SHS", initialValue: 98064000000, currentValue: 123498800000, diff: 23164800000, change: 25.83 },
+                { stock: "HPG", company: "Agribank (AGR)", initialValue: 17025000000, currentValue: 29337200000, diff: 11812200000, change: 77.25 },
+                { stock: "HSG", company: "VNDirect (VND)", initialValue: 444900185600, currentValue: 504000000000, diff: 54001184400, change: 13.06 },
+                { stock: "KBC", company: "Rồng Việt (VDS)", initialValue: 291537550000, currentValue: 524000000000, diff: 225241470000, change: 80.16 },
+                { stock: "MBB", company: "HSC", initialValue: 157063692000, currentValue: 188865000000, diff: 28801308000, change: 19.38 },
+                { stock: "MSH", company: "FPT (FTS)", initialValue: 535956911250, currentValue: 559000000000, diff: 18861108750, change: 4.55 },
+                { stock: "MSN", company: "SSI", initialValue: 41564160000, currentValue: 42100000000, diff: 237340000, change: 1.05 },
+                { stock: "MWG", company: "HSC", initialValue: 386469650000, currentValue: 426000000000, diff: 36407950000, change: 10.18 },
+                { stock: "MWG", company: "Rồng Việt (VDS)", initialValue: 139960400000, currentValue: 154500000000, diff: 13183600000, change: 10.18 },
+                { stock: "NAF", company: "Agribank (AGR)", initialValue: 9740000000, currentValue: 11600000000, diff: 1720000000, change: 19.10 },
+                { stock: "PET", company: "Vietinbank (CTS)", initialValue: 87810760000, currentValue: 126000000000, diff: 36308240000, change: 43.46 },
+                { stock: "SSI", company: "HSC", initialValue: 32722560000, currentValue: 48500000000, diff: 14990890000, change: 47.96 },
+                { stock: "SSI", company: "Agribank (AGR)", initialValue: 20995000000, currentValue: 29700000000, diff: 8228600000, change: 41.65 },
+                { stock: "STB", company: "SSI", initialValue: 149383960000, currentValue: 174000000000, diff: 22568240000, change: 16.08 },
+                { stock: "TCB", company: "HSC", initialValue: 1219893480000, currentValue: 1350000000000, diff: 121936520000, change: 10.46 },
+                { stock: "TCB", company: "TCI", initialValue: 10260000000, currentValue: 11400000000, diff: 1031957600, change: 10.46 },
+                { stock: "TCB", company: "SHS", initialValue: 177840000000, currentValue: 197000000000, diff: 17662345000, change: 10.46 },
+                { stock: "VHC", company: "BSI", initialValue: 74028000000, currentValue: 75500000000, diff: 618000000, change: 1.72 },
+                { stock: "VHM", company: "DNSE", initialValue: 31447000000, currentValue: 39500000000, diff: 7629015200, change: 25.16 },
+                { stock: "VHM", company: "SSI", initialValue: 137741695000, currentValue: 173000000000, diff: 33410345000, change: 25.16 },
+                { stock: "VIB", company: "DNSE", initialValue: 73214713200, currentValue: 93300000000, diff: 19085536800, change: 27.72 },
+                { stock: "VIB", company: "HSC", initialValue: 80896980000, currentValue: 103200000000, diff: 21258870000, change: 27.72 },
+                { stock: "VIB", company: "TCI", initialValue: 16470000000, currentValue: 21000000000, diff: 4306500000, change: 27.72 },
+                { stock: "VND", company: "Agribank (AGR)", initialValue: 13760000000, currentValue: 16200000000, diff: 2144710000, change: 17.03 },
+                { stock: "VPB", company: "HSC", initialValue: 66592600000, currentValue: 107000000000, diff: 39215300000, change: 61.29 },
+                { stock: "VPB", company: "SSI", initialValue: 495181267500, currentValue: 795000000000, diff: 291424732500, change: 61.29 },
+                { stock: "VPB", company: "VNDirect (VND)", initialValue: 471118003000, currentValue: 757000000000, diff: 277342197000, change: 62.16 },
+                { stock: "VPB", company: "BSI", initialValue: 81770314500, currentValue: 131500000000, diff: 48128073000, change: 61.29 },
+                { stock: "VPB", company: "SHS", initialValue: 287536250000, currentValue: 462000000000, diff: 170450905000, change: 61.29 },
+                { stock: "VPB", company: "Vietinbank (CTS)", initialValue: 64372600000, currentValue: 103200000000, diff: 37865400000, change: 61.29 },
+                { stock: "VSC", company: "Vietinbank (CTS)", initialValue: 172637812500, currentValue: 271000000000, diff: 95581187500, change: 58.14 },
+                { stock: "VIX", company: "Vietinbank (CTS)", initialValue: 105493500000, currentValue: 236000000000, diff: 127573800000, change: 124.80 },
+                { stock: "EIB", company: "VIX", initialValue: 1935616005200, currentValue: 2400000000000, diff: 402370942000, change: 23.33 },
+                { stock: "VSC", company: "VIX", initialValue: 1093406250000, currentValue: 1930000000000, diff: 793656250000, change: 76.54 },
+                { stock: "HAH", company: "VIX", initialValue: 936036000000, currentValue: 1180000000000, diff: 214670718000, change: 23.95 },
+                { stock: "GEX", company: "VIX", initialValue: 870293138000, currentValue: 1400000000000, diff: 497975218000, change: 60.16 },
+                { stock: "BSR", company: "VIX", initialValue: 703937955000, currentValue: 920000000000, diff: 201125130000, change: 30.14 },
+                { stock: "PC1", company: "VIX", initialValue: 453330000000, currentValue: 600000000000, diff: 130410000000, change: 30.82 },
+                { stock: "SHS", company: "VIX", initialValue: 490974000000, currentValue: 925000000000, diff: 418660000000, change: 89.23 },
+                { stock: "GEE", company: "VIX", initialValue: 465357720000, currentValue: 630000000000, diff: 150978480000, change: 33.78 },
+                { stock: "HSG", company: "Rồng Việt (VDS)", initialValue: 97599700000, currentValue: 112000000000, diff: 13010530000, change: 13.94 },
+                { stock: "MWG", company: "Rồng Việt (VDS)", initialValue: 139960400000, currentValue: 154500000000, diff: 13183600000, change: 10.18 }
             ];
 
-            const uniqueCompanies = [...new Set(portfolioData.map(item => item.company.replace(/ \(.*/, '')))];
-            const uniqueStocks = [...new Set(portfolioData.map(item => item.stock))];
+            // Lấy danh sách công ty và cổ phiếu duy nhất
+            const uniqueCompanies = [...new Set(portfolioData.map(item => item.company.replace(/ \(.*/, '')))].sort();
+            const uniqueStocks = [...new Set(portfolioData.map(item => item.stock))].sort();
 
             const companySelect = document.getElementById('company-select');
             const stockSelect = document.getElementById('stock-select');
-            
-            uniqueCompanies.sort().forEach(company => {
+
+            // Điền dữ liệu vào dropdown Công ty
+            uniqueCompanies.forEach(company => {
                 const option = document.createElement('option');
                 option.value = company;
                 option.textContent = company;
                 companySelect.appendChild(option);
             });
 
-            uniqueStocks.sort().forEach(stock => {
+            // Điền dữ liệu vào dropdown Cổ phiếu
+            uniqueStocks.forEach(stock => {
                 const option = document.createElement('option');
                 option.value = stock;
                 option.textContent = stock;
                 stockSelect.appendChild(option);
             });
 
+            // Hàm định dạng tiền tệ
             const formatCurrency = (value) => {
-                if (Math.abs(value) >= 1e12) {
-                    return (value / 1e12).toFixed(2) + ' nghìn tỷ';
+                const absoluteValue = Math.abs(value);
+                let formattedValue;
+                let unit = '';
+
+                if (absoluteValue >= 1e12) {
+                    formattedValue = (value / 1e12).toFixed(2);
+                    unit = ' nghìn tỷ';
+                } else if (absoluteValue >= 1e9) {
+                    formattedValue = (value / 1e9).toFixed(2);
+                    unit = ' tỷ';
+                } else if (absoluteValue >= 1e6) {
+                    formattedValue = (value / 1e6).toFixed(2);
+                    unit = ' triệu';
+                } else {
+                    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
                 }
-                if (Math.abs(value) >= 1e9) {
-                    return (value / 1e9).toFixed(2) + ' tỷ';
-                }
-                return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+
+                // Thêm dấu phẩy cho hàng nghìn và hàng triệu trước khi thêm đơn vị
+                const parts = formattedValue.toString().split('.');
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                const formattedNumber = parts.join('.');
+
+                return (value < 0 ? '-' : '') + formattedNumber + unit + ' VND';
             };
 
             const chartInstances = {};
 
+            // Hàm tạo/cập nhật biểu đồ
             function renderChart(canvasId, config) {
                 if (chartInstances[canvasId]) {
                     chartInstances[canvasId].destroy();
                 }
-                const ctx = document.getElementById(canvasId).getContext('2d');
-                chartInstances[canvasId] = new Chart(ctx, config);
+                const ctx = document.getElementById(canvasId);
+                if (ctx) {
+                    chartInstances[canvasId] = new Chart(ctx.getContext('2d'), config);
+                }
             }
 
+            // Cập nhật các chỉ số KPI
             function setupKPIs() {
                 const totalValue = portfolioData.reduce((sum, item) => sum + item.currentValue, 0);
                 const totalDiff = portfolioData.reduce((sum, item) => sum + item.diff, 0);
@@ -306,25 +360,12 @@
                 document.getElementById('stock-count').textContent = uniqueStocks.length;
             }
 
+            // Cập nhật nội dung tab Tổng quan
             function setupOverview() {
-                const stockTotals = portfolioData.reduce((acc, item) => {
-                    acc[item.stock] = (acc[item.stock] || 0) + item.currentValue;
-                    return acc;
-                }, {});
-
-                const topStocks = Object.entries(stockTotals)
-                    .sort(([, a], [, b]) => b - a)
-                    .slice(0, 10);
-
+                // Biểu đồ giá trị theo công ty
                 const companyTotals = portfolioData.reduce((acc, item) => {
                     const companyName = item.company.replace(/ \(.*/, '');
                     acc[companyName] = (acc[companyName] || 0) + item.currentValue;
-                    return acc;
-                }, {});
-                
-                const companyDiffs = portfolioData.reduce((acc, item) => {
-                    const companyName = item.company.replace(/ \(.*/, '');
-                    acc[companyName] = (acc[companyName] || 0) + item.diff;
                     return acc;
                 }, {});
 
@@ -340,9 +381,30 @@
                             borderWidth: 1
                         }]
                     },
-                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                    options: { 
+                        maintainAspectRatio: false, 
+                        responsive: true, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
                 
+                // Biểu đồ chênh lệch theo công ty
+                const companyDiffs = portfolioData.reduce((acc, item) => {
+                    const companyName = item.company.replace(/ \(.*/, '');
+                    acc[companyName] = (acc[companyName] || 0) + item.diff;
+                    return acc;
+                }, {});
+
                 renderChart('companyTotalDiffChart', {
                     type: 'bar',
                     data: {
@@ -355,9 +417,24 @@
                             borderWidth: 1
                         }]
                     },
-                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                    options: { 
+                        maintainAspectRatio: false, 
+                        responsive: true, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
 
+                // Biểu đồ top cổ phiếu
                 const performanceByStock = portfolioData.reduce((acc, item) => {
                     acc[item.stock] = (acc[item.stock] || 0) + item.diff;
                     return acc;
@@ -365,22 +442,40 @@
 
                 const sortedPerformance = Object.entries(performanceByStock).sort(([, a], [, b]) => b - a);
                 const topPerformers = [...sortedPerformance.slice(0, 5), ...sortedPerformance.slice(-5)].sort(([, a], [, b]) => b - a);
+                const performanceLabels = topPerformers.map(item => item[0]);
+                const performanceData = topPerformers.map(item => item[1]);
 
                 renderChart('topPerformanceChart', {
                     type: 'bar',
                     data: {
-                        labels: topPerformers.map(item => item[0]),
+                        labels: performanceLabels,
                         datasets: [{
                             label: 'Chênh lệch',
-                            data: topPerformers.map(item => item[1]),
-                            backgroundColor: topPerformers.map(item => item[1] > 0 ? 'rgba(52, 211, 153, 0.7)' : 'rgba(248, 113, 113, 0.7)'),
-                            borderColor: topPerformers.map(item => item[1] > 0 ? '#10b981' : '#ef4444'),
+                            data: performanceData,
+                            backgroundColor: performanceData.map(item => item > 0 ? 'rgba(52, 211, 153, 0.7)' : 'rgba(248, 113, 113, 0.7)'),
+                            borderColor: performanceData.map(item => item > 0 ? '#10b981' : '#ef4444'),
                             borderWidth: 1
                         }]
                     },
-                    options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                    options: { 
+                        indexAxis: 'y', 
+                        maintainAspectRatio: false, 
+                        responsive: true, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: {
+                                beginAtZero: false,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
-
+                
+                // Biểu đồ tròn phân bổ
                 renderChart('investmentByCompanyChart', {
                     type: 'doughnut',
                     data: {
@@ -394,6 +489,7 @@
                 });
             }
 
+            // Xử lý sự kiện khi thay đổi Công ty
             function handleCompanyChange() {
                 const selectedCompany = companySelect.value;
                 const detailsDiv = document.getElementById('company-details');
@@ -408,6 +504,7 @@
                 document.getElementById('company-chart-title').textContent = `Phân bổ Danh mục của ${selectedCompany}`;
                 document.getElementById('company-table-title').textContent = `Bảng Chi tiết của ${selectedCompany}`;
 
+                // Biểu đồ tròn phân bổ danh mục theo cổ phiếu
                 renderChart('companyPortfolioChart', {
                     type: 'pie',
                     data: {
@@ -420,16 +517,20 @@
                     options: { maintainAspectRatio: false, responsive: true }
                 });
 
+                // Cập nhật bảng chi tiết
                 const tableBody = document.getElementById('company-table-body');
                 tableBody.innerHTML = '';
                 let totalCurrentValue = 0;
+                let totalInitialValue = 0;
                 let totalDiff = 0;
 
                 companyData.sort((a,b) => b.currentValue - a.currentValue).forEach(item => {
                     totalCurrentValue += item.currentValue;
+                    totalInitialValue += item.initialValue;
                     totalDiff += item.diff;
-                    const row = `<tr>
+                    const row = `<tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="p-3 font-semibold">${item.stock}</td>
+                        <td class="p-3 text-right">${formatCurrency(item.initialValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
                         <td class="p-3 text-right ${item.diff >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(item.diff)}</td>
                         <td class="p-3 text-right font-medium ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}">${item.change.toFixed(2)}%</td>
@@ -441,6 +542,7 @@
                 tableFooter.innerHTML = `
                     <tr>
                         <td class="p-3">Tổng cộng</td>
+                        <td class="p-3 text-right">${formatCurrency(totalInitialValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(totalCurrentValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(totalDiff)}</td>
                         <td class="p-3 text-right"></td>
@@ -448,6 +550,7 @@
                 `;
             }
 
+            // Xử lý sự kiện khi thay đổi Cổ phiếu
             function handleStockChange() {
                 const selectedStock = stockSelect.value;
                 const detailsDiv = document.getElementById('stock-details');
@@ -462,6 +565,7 @@
                 document.getElementById('stock-chart-title').textContent = `Phân bổ nắm giữ ${selectedStock} theo Công ty`;
                 document.getElementById('stock-table-title').textContent = `Bảng Chi tiết nắm giữ ${selectedStock}`;
 
+                // Biểu đồ cột phân bổ nắm giữ theo công ty
                 renderChart('stockHoldersChart', {
                     type: 'bar',
                     data: {
@@ -474,19 +578,37 @@
                             borderWidth: 1
                         }]
                     },
-                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                    options: { 
+                        maintainAspectRatio: false, 
+                        responsive: true, 
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 });
 
+                // Cập nhật bảng chi tiết
                 const tableBody = document.getElementById('stock-table-body');
                 tableBody.innerHTML = '';
                 let totalCurrentValue = 0;
+                let totalInitialValue = 0;
                 let totalDiff = 0;
 
                 stockData.sort((a,b) => b.currentValue - a.currentValue).forEach(item => {
                     totalCurrentValue += item.currentValue;
+                    totalInitialValue += item.initialValue;
                     totalDiff += item.diff;
-                    const row = `<tr>
+                    const row = `<tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="p-3 font-semibold">${item.company}</td>
+                        <td class="p-3 text-right">${formatCurrency(item.initialValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
                         <td class="p-3 text-right ${item.diff >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(item.diff)}</td>
                         <td class="p-3 text-right font-medium ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}">${item.change.toFixed(2)}%</td>
@@ -497,6 +619,7 @@
                 tableFooter.innerHTML = `
                     <tr>
                         <td class="p-3">Tổng cộng</td>
+                        <td class="p-3 text-right">${formatCurrency(totalInitialValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(totalCurrentValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(totalDiff)}</td>
                         <td class="p-3 text-right"></td>
@@ -504,18 +627,31 @@
                 `;
             }
 
+            // Xử lý chuyển đổi giữa các tab
             document.querySelectorAll('.tab-btn').forEach(button => {
                 button.addEventListener('click', () => {
+                    // Loại bỏ trạng thái 'active' khỏi tất cả các nút tab
                     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                    // Thêm trạng thái 'active' vào nút được click
                     button.classList.add('active');
+                    // Ẩn tất cả nội dung tab
                     document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-                    document.getElementById(`${button.dataset.tab}-content`).classList.remove('hidden');
+                    // Hiển thị nội dung của tab được chọn
+                    const selectedTabId = button.dataset.tab;
+                    document.getElementById(`${selectedTabId}-content`).classList.remove('hidden');
+
+                    // Gọi lại hàm render biểu đồ cho tab Tổng quan khi chuyển về
+                    if (selectedTabId === 'overview') {
+                        setupOverview();
+                    }
                 });
             });
 
+            // Lắng nghe sự kiện thay đổi của dropdown
             companySelect.addEventListener('change', handleCompanyChange);
             stockSelect.addEventListener('change', handleStockChange);
 
+            // Khởi tạo trang web lần đầu
             setupKPIs();
             setupOverview();
         });
