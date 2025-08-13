@@ -70,7 +70,7 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Bảng điều khiển Danh mục Tự doanh FVTPL</h1>
-            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 08/08/2025</p>
+            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 12/08/2025</p>
         </header>
 
         <main>
@@ -102,21 +102,25 @@
 
                 <div id="overview-content" class="tab-content">
                     <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">
-                        Phân tích tổng quan cung cấp cái nhìn toàn cảnh về danh mục đầu tư của các công ty chứng khoán. Biểu đồ dưới đây thể hiện các cổ phiếu được đầu tư nhiều nhất và sự phân bổ giá trị đầu tư giữa các công ty.
+                        Phân tích tổng quan cung cấp cái nhìn toàn cảnh về danh mục đầu tư của các công ty chứng khoán. Các biểu đồ dưới đây giúp bạn dễ dàng so sánh tổng giá trị và chênh lệch đánh giá của từng công ty.
                     </p>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                         <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-xl font-semibold text-center mb-4">Top 10 Cổ phiếu theo Tổng Giá trị Đầu tư</h3>
-                            <div class="chart-container"><canvas id="topStocksChart"></canvas></div>
+                            <h3 class="text-xl font-semibold text-center mb-4">Tổng Giá trị hiện tại của Danh mục tự doanh theo Công ty</h3>
+                            <div class="chart-container"><canvas id="companyTotalValueChart"></canvas></div>
                         </div>
                         <div class="bg-gray-50 p-6 rounded-lg">
-                            <h3 class="text-xl font-semibold text-center mb-4">Phân bổ Đầu tư theo Công ty</h3>
-                            <div class="chart-container"><canvas id="investmentByCompanyChart"></canvas></div>
+                            <h3 class="text-xl font-semibold text-center mb-4">Tổng Chênh lệch đánh giá của Danh mục tự doanh theo Công ty</h3>
+                            <div class="chart-container"><canvas id="companyTotalDiffChart"></canvas></div>
                         </div>
                         <div class="lg:col-span-2 bg-gray-50 p-6 rounded-lg">
                             <h3 class="text-xl font-semibold text-center mb-4">Top 10 Cổ phiếu Lãi/Lỗ Cao nhất</h3>
                              <p class="text-center text-sm text-gray-500 mb-4">Dựa trên chênh lệch đánh giá tài sản</p>
                             <div class="chart-container"><canvas id="topPerformanceChart"></canvas></div>
+                        </div>
+                         <div class="lg:col-span-2 bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold text-center mb-4">Phân bổ Đầu tư theo Công ty</h3>
+                            <div class="chart-container"><canvas id="investmentByCompanyChart"></canvas></div>
                         </div>
                     </div>
                 </div>
@@ -148,6 +152,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="company-table-body"></tbody>
+                                    <tfoot id="company-table-footer" class="bg-gray-200 font-bold"></tfoot>
                                 </table>
                             </div>
                         </div>
@@ -181,6 +186,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="stock-table-body"></tbody>
+                                    <tfoot id="stock-table-footer" class="bg-gray-200 font-bold"></tfoot>
                                 </table>
                             </div>
                         </div>
@@ -240,7 +246,15 @@
                 { stock: "VPB", company: "SHS", currentValue: 457987155000, diff: 170450905000, change: 58.87 },
                 { stock: "VPB", company: "Vietinbank (CTS)", currentValue: 102238000000, diff: 37865400000, change: 58.87 },
                 { stock: "VSC", company: "Vietinbank (CTS)", currentValue: 268219000000, diff: 95581187500, change: 55.42 },
-                { stock: "VIX", company: "Vietinbank (CTS)", currentValue: 233067300000, diff: 127573800000, change: 120.93 }
+                { stock: "VIX", company: "Vietinbank (CTS)", currentValue: 233067300000, diff: 127573800000, change: 120.93 },
+                { stock: "EIB", company: "VIX", currentValue: 2337986947200, diff: 402370942000, change: 20.78 },
+                { stock: "VSC", company: "VIX", currentValue: 1887062500000, diff: 793656250000, change: 72.58 },
+                { stock: "HAH", company: "VIX", currentValue: 1150706734053, diff: 214670734053, change: 22.93 },
+                { stock: "GEX", company: "VIX", currentValue: 1368268356000, diff: 497975218000, change: 57.22 },
+                { stock: "BSR", company: "VIX", currentValue: 905063085000, diff: 201125130000, change: 28.57 },
+                { stock: "PC1", company: "VIX", currentValue: 583740000000, diff: 130410000000, change: 28.77 },
+                { stock: "SHS", company: "VIX", currentValue: 909634000000, diff: 418660000000, change: 85.27 },
+                { stock: "GEE", company: "VIX", currentValue: 616336200000, diff: 150978480000, change: 32.44 }
             ];
 
             const uniqueCompanies = [...new Set(portfolioData.map(item => item.company.replace(/ \(.*/, '')))];
@@ -302,13 +316,25 @@
                     .sort(([, a], [, b]) => b - a)
                     .slice(0, 10);
 
-                renderChart('topStocksChart', {
+                const companyTotals = portfolioData.reduce((acc, item) => {
+                    const companyName = item.company.replace(/ \(.*/, '');
+                    acc[companyName] = (acc[companyName] || 0) + item.currentValue;
+                    return acc;
+                }, {});
+                
+                const companyDiffs = portfolioData.reduce((acc, item) => {
+                    const companyName = item.company.replace(/ \(.*/, '');
+                    acc[companyName] = (acc[companyName] || 0) + item.diff;
+                    return acc;
+                }, {});
+
+                renderChart('companyTotalValueChart', {
                     type: 'bar',
                     data: {
-                        labels: topStocks.map(item => item[0]),
+                        labels: Object.keys(companyTotals),
                         datasets: [{
-                            label: 'Tổng Giá trị Đầu tư',
-                            data: topStocks.map(item => item[1]),
+                            label: 'Tổng Giá trị Hiện tại',
+                            data: Object.values(companyTotals),
                             backgroundColor: '#60a5fa',
                             borderColor: '#3b82f6',
                             borderWidth: 1
@@ -316,25 +342,22 @@
                     },
                     options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
                 });
-
-                const companyTotals = portfolioData.reduce((acc, item) => {
-                    const companyName = item.company.replace(/ \(.*/, '');
-                    acc[companyName] = (acc[companyName] || 0) + item.currentValue;
-                    return acc;
-                }, {});
-
-                renderChart('investmentByCompanyChart', {
-                    type: 'doughnut',
+                
+                renderChart('companyTotalDiffChart', {
+                    type: 'bar',
                     data: {
-                        labels: Object.keys(companyTotals),
+                        labels: Object.keys(companyDiffs),
                         datasets: [{
-                            data: Object.values(companyTotals),
-                            backgroundColor: ['#34d399', '#f87171', '#fbbf24', '#a78bfa', '#60a5fa', '#fb923c', '#f472b6', '#2dd4bf'],
+                            label: 'Tổng Chênh lệch Đánh giá',
+                            data: Object.values(companyDiffs),
+                            backgroundColor: Object.values(companyDiffs).map(diff => diff >= 0 ? 'rgba(52, 211, 153, 0.7)' : 'rgba(248, 113, 113, 0.7)'),
+                            borderColor: Object.values(companyDiffs).map(diff => diff >= 0 ? '#10b981' : '#ef4444'),
+                            borderWidth: 1
                         }]
                     },
-                    options: { maintainAspectRatio: false, responsive: true }
+                    options: { maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
                 });
-                
+
                 const performanceByStock = portfolioData.reduce((acc, item) => {
                     acc[item.stock] = (acc[item.stock] || 0) + item.diff;
                     return acc;
@@ -356,6 +379,18 @@
                         }]
                     },
                     options: { indexAxis: 'y', maintainAspectRatio: false, responsive: true, plugins: { legend: { display: false } } }
+                });
+
+                renderChart('investmentByCompanyChart', {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(companyTotals),
+                        datasets: [{
+                            data: Object.values(companyTotals),
+                            backgroundColor: ['#34d399', '#f87171', '#fbbf24', '#a78bfa', '#60a5fa', '#fb923c', '#f472b6', '#2dd4bf'],
+                        }]
+                    },
+                    options: { maintainAspectRatio: false, responsive: true }
                 });
             }
 
@@ -387,7 +422,12 @@
 
                 const tableBody = document.getElementById('company-table-body');
                 tableBody.innerHTML = '';
+                let totalCurrentValue = 0;
+                let totalDiff = 0;
+
                 companyData.sort((a,b) => b.currentValue - a.currentValue).forEach(item => {
+                    totalCurrentValue += item.currentValue;
+                    totalDiff += item.diff;
                     const row = `<tr>
                         <td class="p-3 font-semibold">${item.stock}</td>
                         <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
@@ -396,6 +436,16 @@
                     </tr>`;
                     tableBody.innerHTML += row;
                 });
+                
+                const tableFooter = document.getElementById('company-table-footer');
+                tableFooter.innerHTML = `
+                    <tr>
+                        <td class="p-3">Tổng cộng</td>
+                        <td class="p-3 text-right">${formatCurrency(totalCurrentValue)}</td>
+                        <td class="p-3 text-right">${formatCurrency(totalDiff)}</td>
+                        <td class="p-3 text-right"></td>
+                    </tr>
+                `;
             }
 
             function handleStockChange() {
@@ -429,7 +479,12 @@
 
                 const tableBody = document.getElementById('stock-table-body');
                 tableBody.innerHTML = '';
+                let totalCurrentValue = 0;
+                let totalDiff = 0;
+
                 stockData.sort((a,b) => b.currentValue - a.currentValue).forEach(item => {
+                    totalCurrentValue += item.currentValue;
+                    totalDiff += item.diff;
                     const row = `<tr>
                         <td class="p-3 font-semibold">${item.company}</td>
                         <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
@@ -438,6 +493,15 @@
                     </tr>`;
                     tableBody.innerHTML += row;
                 });
+                const tableFooter = document.getElementById('stock-table-footer');
+                tableFooter.innerHTML = `
+                    <tr>
+                        <td class="p-3">Tổng cộng</td>
+                        <td class="p-3 text-right">${formatCurrency(totalCurrentValue)}</td>
+                        <td class="p-3 text-right">${formatCurrency(totalDiff)}</td>
+                        <td class="p-3 text-right"></td>
+                    </tr>
+                `;
             }
 
             document.querySelectorAll('.tab-btn').forEach(button => {
