@@ -13,7 +13,7 @@
     <!-- Lựa chọn trực quan hóa & nội dung: 
         - Các chỉ số chính (KPI): Mục tiêu: Thông báo. Phương pháp: Thẻ HTML được tạo kiểu. Tương tác: Hiển thị tĩnh. Lý do: Cung cấp ngay lập tức các số liệu tóm tắt cấp cao.
         - Tổng giá trị theo Công ty (Biểu đồ thanh): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Nhanh chóng xác định tổng giá trị đầu tư của mỗi công ty chứng khoán.
-        - Tổng chênh lệch đánh giá theo Công ty (Biểu đồ thanh): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Nhanh chóng xác định hiệu quả đầu tư tổng thể của mỗi công ty.
+        - Tổng chênh lệch đánh giá theo Công ty (Biểu đồ thanh): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Nổi bật những cổ phiếu tăng và giảm lớn nhất để phân tích hiệu suất nhanh chóng.
         - Top/Bottom cổ phiếu có hiệu suất cao nhất (Biểu đồ thanh ngang): Mục tiêu: So sánh. Phương pháp: Canvas Chart.js với màu sắc có điều kiện. Tương tác: Gợi ý khi di chuột. Lý do: Nổi bật những cổ phiếu tăng và giảm lớn nhất để phân tích hiệu suất nhanh chóng.
         - Phân bổ đầu tư theo Công ty (Biểu đồ tròn): Mục tiêu: So sánh/Phân bổ. Phương pháp: Canvas Chart.js. Tương tác: Gợi ý khi di chuột. Lý do: Cho thấy quy mô đầu tư tương đối của từng công ty chứng khoán.
         - Bộ lọc thả xuống & Bảng/Biểu đồ động: Mục tiêu: Tổ chức/Tương tác. Phương pháp: Các phần tử chọn HTML + lọc JS + cập nhật bảng/biểu đồ Chart.js/HTML. Lý do: Cho phép khám phá mạnh mẽ, do người dùng điều khiển các danh mục đầu tư cụ thể của công ty và quyền sở hữu cụ thể của cổ phiếu mà không cần rời khỏi trang.
@@ -91,7 +91,7 @@
     <div class="container mx-auto p-4 sm:p-6 md:p-8">
         <header class="text-center mb-8">
             <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Bảng điều khiển Danh mục Tự doanh FVTPL</h1>
-            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 13/08/2025</p>
+            <p class="text-lg text-gray-500 mt-2">Tổng hợp và phân tích danh mục tại ngày 14/08/2025</p>
         </header>
 
         <main>
@@ -171,7 +171,9 @@
                                     <thead class="bg-gray-200">
                                         <tr>
                                             <th class="p-3">Mã CK</th>
+                                            <th class="p-3 text-right">Giá cổ phiếu 30/06</th>
                                             <th class="p-3 text-right">Giá trị 30/06</th>
+                                            <th class="p-3 text-right">Giá cổ phiếu hiện tại</th>
                                             <th class="p-3 text-right">Giá trị Hiện tại</th>
                                             <th class="p-3 text-right">Chênh lệch</th>
                                             <th class="p-3 text-right">% Tăng/giảm</th>
@@ -207,7 +209,9 @@
                                     <thead class="bg-gray-200">
                                         <tr>
                                             <th class="p-3">Công ty</th>
+                                            <th class="p-3 text-right">Giá cổ phiếu 30/06</th>
                                             <th class="p-3 text-right">Giá trị 30/06</th>
+                                            <th class="p-3 text-right">Giá cổ phiếu hiện tại</th>
                                             <th class="p-3 text-right">Giá trị Hiện tại</th>
                                             <th class="p-3 text-right">Chênh lệch</th>
                                             <th class="p-3 text-right">% Tăng/giảm</th>
@@ -226,70 +230,84 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Dữ liệu giả lập
+            // Dữ liệu giả lập với giá cổ phiếu và giá trị 30/06 cập nhật từ hình ảnh bạn cung cấp
             const portfolioData = [
-                { stock: "ACB", company: "SSI", initialValue: 17764817700, currentValue: 20435700000, diff: 2342682300, change: 14.49 },
-                { stock: "ACB", company: "SSI (phòng ngừa)", initialValue: 114180013200, currentValue: 131758525000, diff: 15225061800, change: 14.49 },
-                { stock: "ACB", company: "Rồng Việt (VDS)", initialValue: 126089162700, currentValue: 146200000000, diff: 16817587300, change: 14.49 },
-                { stock: "EIB", company: "Vietinbank (CTS)", initialValue: 282197500000, currentValue: 337886100000, diff: 51933110000, change: 19.73 },
-                { stock: "FPT", company: "HSC", initialValue: 891074340000, currentValue: 920088000000, diff: 23653660000, change: 3.17 },
-                { stock: "FPT", company: "SHS", initialValue: 252985824000, currentValue: 261174920000, diff: 6620696000, change: 3.17 },
-                { stock: "FPT", company: "Agribank (AGR)", initialValue: 8865000000, currentValue: 9122750000, diff: 209850000, change: 2.82 },
-                { stock: "GEX", company: "SHS", initialValue: 426739797000, currentValue: 455000000000, diff: 15260203000, change: 6.62 },
-                { stock: "GEX", company: "Vietinbank (CTS)", initialValue: 7842406000, currentValue: 8350000000, diff: 297194000, change: 6.99 },
-                { stock: "GMD", company: "HSC", initialValue: 35567970000, currentValue: 38300000000, diff: 2112030000, change: 7.75 },
-                { stock: "HPG", company: "HSC", initialValue: 258976128000, currentValue: 325884800000, diff: 61159072000, change: 25.83 },
-                { stock: "HPG", company: "SSI", initialValue: 34574301900, currentValue: 43372800000, diff: 8164898100, change: 25.83 },
-                { stock: "HPG", company: "SSI (phòng ngừa)", initialValue: 127914114100, currentValue: 160935600000, diff: 30201885900, change: 25.83 },
-                { stock: "HPG", company: "TCI", initialValue: 11713200000, currentValue: 14742512000, diff: 2766692000, change: 25.83 },
-                { stock: "HPG", company: "BSI", initialValue: 114136644200, currentValue: 143788800000, diff: 26972155800, change: 25.83 },
-                { stock: "HPG", company: "SHS", initialValue: 98064000000, currentValue: 123498800000, diff: 23164800000, change: 25.83 },
-                { stock: "HPG", company: "Agribank (AGR)", initialValue: 17025000000, currentValue: 29337200000, diff: 11812200000, change: 77.25 },
-                { stock: "HSG", company: "VNDirect (VND)", initialValue: 444900185600, currentValue: 504000000000, diff: 54001184400, change: 13.06 },
-                { stock: "KBC", company: "Rồng Việt (VDS)", initialValue: 291537550000, currentValue: 524000000000, diff: 225241470000, change: 80.16 },
-                { stock: "MBB", company: "HSC", initialValue: 157063692000, currentValue: 188865000000, diff: 28801308000, change: 19.38 },
-                { stock: "MSH", company: "FPT (FTS)", initialValue: 535956911250, currentValue: 559000000000, diff: 18861108750, change: 4.55 },
-                { stock: "MSN", company: "SSI", initialValue: 41564160000, currentValue: 42100000000, diff: 237340000, change: 1.05 },
-                { stock: "MWG", company: "HSC", initialValue: 386469650000, currentValue: 426000000000, diff: 36407950000, change: 10.18 },
-                { stock: "MWG", company: "Rồng Việt (VDS)", initialValue: 139960400000, currentValue: 154500000000, diff: 13183600000, change: 10.18 },
-                { stock: "NAF", company: "Agribank (AGR)", initialValue: 9740000000, currentValue: 11600000000, diff: 1720000000, change: 19.10 },
-                { stock: "PET", company: "Vietinbank (CTS)", initialValue: 87810760000, currentValue: 126000000000, diff: 36308240000, change: 43.46 },
-                { stock: "SSI", company: "HSC", initialValue: 32722560000, currentValue: 48500000000, diff: 14990890000, change: 47.96 },
-                { stock: "SSI", company: "Agribank (AGR)", initialValue: 20995000000, currentValue: 29700000000, diff: 8228600000, change: 41.65 },
-                { stock: "STB", company: "SSI", initialValue: 149383960000, currentValue: 174000000000, diff: 22568240000, change: 16.08 },
-                { stock: "TCB", company: "HSC", initialValue: 1219893480000, currentValue: 1350000000000, diff: 121936520000, change: 10.46 },
-                { stock: "TCB", company: "TCI", initialValue: 10260000000, currentValue: 11400000000, diff: 1031957600, change: 10.46 },
-                { stock: "TCB", company: "SHS", initialValue: 177840000000, currentValue: 197000000000, diff: 17662345000, change: 10.46 },
-                { stock: "VHC", company: "BSI", initialValue: 74028000000, currentValue: 75500000000, diff: 618000000, change: 1.72 },
-                { stock: "VHM", company: "DNSE", initialValue: 31447000000, currentValue: 39500000000, diff: 7629015200, change: 25.16 },
-                { stock: "VHM", company: "SSI", initialValue: 137741695000, currentValue: 173000000000, diff: 33410345000, change: 25.16 },
-                { stock: "VIB", company: "DNSE", initialValue: 73214713200, currentValue: 93300000000, diff: 19085536800, change: 27.72 },
-                { stock: "VIB", company: "HSC", initialValue: 80896980000, currentValue: 103200000000, diff: 21258870000, change: 27.72 },
-                { stock: "VIB", company: "TCI", initialValue: 16470000000, currentValue: 21000000000, diff: 4306500000, change: 27.72 },
-                { stock: "VND", company: "Agribank (AGR)", initialValue: 13760000000, currentValue: 16200000000, diff: 2144710000, change: 17.03 },
-                { stock: "VPB", company: "HSC", initialValue: 66592600000, currentValue: 107000000000, diff: 39215300000, change: 61.29 },
-                { stock: "VPB", company: "SSI", initialValue: 495181267500, currentValue: 795000000000, diff: 291424732500, change: 61.29 },
-                { stock: "VPB", company: "VNDirect (VND)", initialValue: 471118003000, currentValue: 757000000000, diff: 277342197000, change: 62.16 },
-                { stock: "VPB", company: "BSI", initialValue: 81770314500, currentValue: 131500000000, diff: 48128073000, change: 61.29 },
-                { stock: "VPB", company: "SHS", initialValue: 287536250000, currentValue: 462000000000, diff: 170450905000, change: 61.29 },
-                { stock: "VPB", company: "Vietinbank (CTS)", initialValue: 64372600000, currentValue: 103200000000, diff: 37865400000, change: 61.29 },
-                { stock: "VSC", company: "Vietinbank (CTS)", initialValue: 172637812500, currentValue: 271000000000, diff: 95581187500, change: 58.14 },
-                { stock: "VIX", company: "Vietinbank (CTS)", initialValue: 105493500000, currentValue: 236000000000, diff: 127573800000, change: 124.80 },
-                { stock: "EIB", company: "VIX", initialValue: 1935616005200, currentValue: 2400000000000, diff: 402370942000, change: 23.33 },
-                { stock: "VSC", company: "VIX", initialValue: 1093406250000, currentValue: 1930000000000, diff: 793656250000, change: 76.54 },
-                { stock: "HAH", company: "VIX", initialValue: 936036000000, currentValue: 1180000000000, diff: 214670718000, change: 23.95 },
-                { stock: "GEX", company: "VIX", initialValue: 870293138000, currentValue: 1400000000000, diff: 497975218000, change: 60.16 },
-                { stock: "BSR", company: "VIX", initialValue: 703937955000, currentValue: 920000000000, diff: 201125130000, change: 30.14 },
-                { stock: "PC1", company: "VIX", initialValue: 453330000000, currentValue: 600000000000, diff: 130410000000, change: 30.82 },
-                { stock: "SHS", company: "VIX", initialValue: 490974000000, currentValue: 925000000000, diff: 418660000000, change: 89.23 },
-                { stock: "GEE", company: "VIX", initialValue: 465357720000, currentValue: 630000000000, diff: 150978480000, change: 33.78 },
-                { stock: "HSG", company: "Rồng Việt (VDS)", initialValue: 97599700000, currentValue: 112000000000, diff: 13010530000, change: 13.94 },
-                { stock: "MWG", company: "Rồng Việt (VDS)", initialValue: 139960400000, currentValue: 154500000000, diff: 13183600000, change: 10.18 }
+                { stock: "ACB", company: "SSI", shares: 789500, price_30_06: 21300, price_current: 26550, initialValue: 16807350000 },
+                { stock: "ACB", company: "SSI (phòng ngừa)", shares: 5074667, price_30_06: 21300, price_current: 26550, initialValue: 108095400000 },
+                { stock: "ACB", company: "Rồng Việt (VDS)", shares: 5603963, price_30_06: 21300, price_current: 26550, initialValue: 119364400000 },
+                { stock: "EIB", company: "Vietinbank (CTS)", shares: 14852500, price_30_06: 22900, price_current: 29550, initialValue: 282197500000 },
+                { stock: "FPT", company: "HSC", shares: 7425620, price_30_06: 102800, price_current: 102900, initialValue: 763428800000 },
+                { stock: "FPT", company: "SHS", shares: 2108215, price_30_06: 102800, price_current: 102900, initialValue: 216709800000 },
+                { stock: "FPT", company: "Agribank (AGR)", shares: 73875, price_30_06: 102800, price_current: 102900, initialValue: 7594500000 },
+                { stock: "GEX", company: "SHS", shares: 17069592, price_30_06: 37400, price_current: 56900, initialValue: 638400000000 },
+                { stock: "GEX", company: "Vietinbank (CTS)", shares: 313696, price_30_06: 37400, price_current: 56900, initialValue: 7842406000 },
+                { stock: "GMD", company: "HSC", shares: 508114, price_30_06: 70500, price_current: 75200, initialValue: 35820000000 },
+                { stock: "HPG", company: "HSC", shares: 8930211, price_30_06: 22700, price_current: 28200, initialValue: 202905000000 },
+                { stock: "HPG", company: "SSI", shares: 1192217, price_30_06: 22700, price_current: 28200, initialValue: 27050000000 },
+                { stock: "HPG", company: "SSI (phòng ngừa)", shares: 4410831, price_30_06: 22700, price_current: 28200, initialValue: 100140000000 },
+                { stock: "HPG", company: "TCI", shares: 403903, price_30_06: 22700, price_current: 28200, initialValue: 9168000000 },
+                { stock: "HPG", company: "BSI", shares: 3935746, price_30_06: 22700, price_current: 28200, initialValue: 89320000000 },
+                { stock: "HPG", company: "SHS", shares: 3381517, price_30_06: 22700, price_current: 28200, initialValue: 76770000000 },
+                { stock: "HPG", company: "Agribank (AGR)", shares: 587069, price_30_06: 22700, price_current: 28200, initialValue: 13329000000 },
+                { stock: "HSG", company: "VNDirect (VND)", shares: 18537508, price_30_06: 16600, price_current: 19550, initialValue: 307722600000 },
+                { stock: "KBC", company: "Rồng Việt (VDS)", shares: 14576300, price_30_06: 26800, price_current: 33050, initialValue: 390055000000 },
+                { stock: "MBB", company: "HSC", shares: 6465548, price_30_06: 19500, price_current: 28500, initialValue: 126078000000 },
+                { stock: "MSH", company: "FPT (FTS)", shares: 6305375, price_30_06: 37300, price_current: 37800, initialValue: 235250000000 },
+                { stock: "MSN", company: "SSI", shares: 519552, price_30_06: 76800, price_current: 84300, initialValue: 39900000000 },
+                { stock: "MWG", company: "HSC", shares: 7887136, price_30_06: 58900, price_current: 70400, initialValue: 464520000000 },
+                { stock: "MWG", company: "Rồng Việt (VDS)", shares: 2856335, price_30_06: 58900, price_current: 70400, initialValue: 168250000000 },
+                { stock: "NAF", company: "Agribank (AGR)", shares: 811667, price_30_06: 25400, price_current: 28650, initialValue: 20610000000 },
+                { stock: "PET", company: "Vietinbank (CTS)", shares: 3136100, price_30_06: 24100, price_current: 36050, initialValue: 87810760000 },
+                { stock: "SSI", company: "HSC", shares: 991592, price_30_06: 24700, price_current: 36700, initialValue: 24500000000 },
+                { stock: "SSI", company: "Agribank (AGR)", shares: 636212, price_30_06: 24700, price_current: 36700, initialValue: 15720000000 },
+                { stock: "STB", company: "SSI", shares: 4897835, price_30_06: 45700, price_current: 54100, initialValue: 223900000000 },
+                { stock: "TCB", company: "HSC", shares: 30497337, price_30_06: 34200, price_current: 38000, initialValue: 1042910000000 },
+                { stock: "TCB", company: "TCI", shares: 256500, price_30_06: 34200, price_current: 38000, initialValue: 8772000000 },
+                { stock: "TCB", company: "SHS", shares: 4446000, price_30_06: 34200, price_current: 38000, initialValue: 152140000000 },
+                { stock: "VHC", company: "BSI", shares: 925350, price_30_06: 59700, price_current: 59900, initialValue: 55260000000 },
+                { stock: "VHM", company: "DNSE", shares: 898486, price_30_06: 76700, price_current: 94100, initialValue: 68925000000 },
+                { stock: "VHM", company: "SSI", shares: 3935477, price_30_06: 76700, price_current: 94100, initialValue: 301800000000 },
+                { stock: "VIB", company: "DNSE", shares: 2928588, price_30_06: 16100, price_current: 20450, initialValue: 47160000000 },
+                { stock: "VIB", company: "HSC", shares: 3235879, price_30_06: 16100, price_current: 20450, initialValue: 52080000000 },
+                { stock: "VIB", company: "TCI", shares: 658800, price_30_06: 16100, price_current: 20450, initialValue: 10617000000 },
+                { stock: "VND", company: "Agribank (AGR)", shares: 917333, price_30_06: 17200, price_current: 24650, initialValue: 15778000000 },
+                { stock: "VPB", company: "HSC", shares: 3329630, price_30_06: 18500, price_current: 31500, initialValue: 61608000000 },
+                { stock: "VPB", company: "SSI", shares: 24759063, price_30_06: 18500, price_current: 31500, initialValue: 458042000000 },
+                { stock: "VPB", company: "VNDirect (VND)", shares: 23555900, price_30_06: 18500, price_current: 31500, initialValue: 435784000000 },
+                { stock: "VPB", company: "BSI", shares: 4088516, price_30_06: 18500, price_current: 31500, initialValue: 75630000000 },
+                { stock: "VPB", company: "SHS", shares: 14376812, price_30_06: 18500, price_current: 31500, initialValue: 266000000000 },
+                { stock: "VPB", company: "Vietinbank (CTS)", shares: 3218630, price_30_06: 18500, price_current: 31500, initialValue: 64372600000 },
+                { stock: "VSC", company: "Vietinbank (CTS)", shares: 4315945, price_30_06: 16050, price_current: 33350, initialValue: 172637812500 },
+                { stock: "VIX", company: "Vietinbank (CTS)", shares: 5274675, price_30_06: 12800, price_current: 34350, initialValue: 105493500000 },
+                { stock: "EIB", company: "VIX", shares: 88000000, price_30_06: 22900, price_current: 29550, initialValue: 2015200000000 },
+                { stock: "VSC", company: "VIX", shares: 27335156, price_30_06: 16050, price_current: 33350, initialValue: 438698000000 },
+                { stock: "HAH", company: "VIX", shares: 16715000, price_30_06: 51200, price_current: 61400, initialValue: 855550000000 },
+                { stock: "GEX", company: "VIX", shares: 34811726, price_30_06: 37400, price_current: 56900, initialValue: 1301900000000 },
+                { stock: "BSR", company: "VIX", shares: 35196904, price_30_06: 17900, price_current: 24100, initialValue: 629900000000 },
+                { stock: "PC1", company: "VIX", shares: 15111000, price_30_06: 21900, price_current: 27700, initialValue: 330950000000 },
+                { stock: "SHS", company: "VIX", shares: 27276333, price_30_06: 12900, price_current: 25200, initialValue: 351850000000 },
+                { stock: "GEE", company: "VIX", shares: 13349649, price_30_06: 97400, price_current: 125000, initialValue: 1300000000000 },
+                { stock: "HNG", company: "Vietinbank (CTS)", shares: 6262834, price_30_06: 5900, price_current: 6700, initialValue: 36950720000 },
+                { stock: "TLP", company: "Vietinbank (CTS)", shares: 2126697, price_30_06: 6900, price_current: 7200, initialValue: 14674211100 },
+                { stock: "HSG", company: "Rồng Việt (VDS)", shares: 4066654, price_30_06: 16600, price_current: 19550, initialValue: 67500000000 }
             ];
 
+            // Hàm tính toán các giá trị dựa trên dữ liệu thô
+            const calculatePortfolioData = (data) => {
+                return data.map(item => ({
+                    ...item,
+                    initialValue: item.initialValue, // Giá trị đã có sẵn từ dữ liệu
+                    currentValue: (item.initialValue / item.price_30_06) * item.price_current,
+                    diff: ((item.initialValue / item.price_30_06) * item.price_current) - item.initialValue,
+                    change: (((item.initialValue / item.price_30_06) * item.price_current - item.initialValue) / item.initialValue) * 100
+                }));
+            };
+
+            const calculatedData = calculatePortfolioData(portfolioData);
+
             // Lấy danh sách công ty và cổ phiếu duy nhất
-            const uniqueCompanies = [...new Set(portfolioData.map(item => item.company.replace(/ \(.*/, '')))].sort();
-            const uniqueStocks = [...new Set(portfolioData.map(item => item.stock))].sort();
+            const uniqueCompanies = [...new Set(calculatedData.map(item => item.company.replace(/ \(.*/, '')))].sort();
+            const uniqueStocks = [...new Set(calculatedData.map(item => item.stock))].sort();
 
             const companySelect = document.getElementById('company-select');
             const stockSelect = document.getElementById('stock-select');
@@ -329,12 +347,16 @@
                     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
                 }
 
-                // Thêm dấu phẩy cho hàng nghìn và hàng triệu trước khi thêm đơn vị
                 const parts = formattedValue.toString().split('.');
                 parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
                 const formattedNumber = parts.join('.');
 
                 return (value < 0 ? '-' : '') + formattedNumber + unit + ' VND';
+            };
+
+            // Hàm định dạng giá cổ phiếu
+            const formatStockPrice = (value) => {
+                return new Intl.NumberFormat('vi-VN').format(value);
             };
 
             const chartInstances = {};
@@ -352,8 +374,8 @@
 
             // Cập nhật các chỉ số KPI
             function setupKPIs() {
-                const totalValue = portfolioData.reduce((sum, item) => sum + item.currentValue, 0);
-                const totalDiff = portfolioData.reduce((sum, item) => sum + item.diff, 0);
+                const totalValue = calculatedData.reduce((sum, item) => sum + item.currentValue, 0);
+                const totalDiff = calculatedData.reduce((sum, item) => sum + item.diff, 0);
                 document.getElementById('total-value').textContent = formatCurrency(totalValue);
                 document.getElementById('total-diff').textContent = formatCurrency(totalDiff);
                 document.getElementById('company-count').textContent = uniqueCompanies.length;
@@ -363,7 +385,7 @@
             // Cập nhật nội dung tab Tổng quan
             function setupOverview() {
                 // Biểu đồ giá trị theo công ty
-                const companyTotals = portfolioData.reduce((acc, item) => {
+                const companyTotals = calculatedData.reduce((acc, item) => {
                     const companyName = item.company.replace(/ \(.*/, '');
                     acc[companyName] = (acc[companyName] || 0) + item.currentValue;
                     return acc;
@@ -399,7 +421,7 @@
                 });
                 
                 // Biểu đồ chênh lệch theo công ty
-                const companyDiffs = portfolioData.reduce((acc, item) => {
+                const companyDiffs = calculatedData.reduce((acc, item) => {
                     const companyName = item.company.replace(/ \(.*/, '');
                     acc[companyName] = (acc[companyName] || 0) + item.diff;
                     return acc;
@@ -435,7 +457,7 @@
                 });
 
                 // Biểu đồ top cổ phiếu
-                const performanceByStock = portfolioData.reduce((acc, item) => {
+                const performanceByStock = calculatedData.reduce((acc, item) => {
                     acc[item.stock] = (acc[item.stock] || 0) + item.diff;
                     return acc;
                 }, {});
@@ -499,7 +521,7 @@
                 }
                 detailsDiv.classList.remove('hidden');
 
-                const companyData = portfolioData.filter(item => item.company.startsWith(selectedCompany));
+                const companyData = calculatedData.filter(item => item.company.startsWith(selectedCompany));
                 
                 document.getElementById('company-chart-title').textContent = `Phân bổ Danh mục của ${selectedCompany}`;
                 document.getElementById('company-table-title').textContent = `Bảng Chi tiết của ${selectedCompany}`;
@@ -530,7 +552,9 @@
                     totalDiff += item.diff;
                     const row = `<tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="p-3 font-semibold">${item.stock}</td>
+                        <td class="p-3 text-right">${formatStockPrice(item.price_30_06)} VND</td>
                         <td class="p-3 text-right">${formatCurrency(item.initialValue)}</td>
+                        <td class="p-3 text-right">${formatStockPrice(item.price_current)} VND</td>
                         <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
                         <td class="p-3 text-right ${item.diff >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(item.diff)}</td>
                         <td class="p-3 text-right font-medium ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}">${item.change.toFixed(2)}%</td>
@@ -542,7 +566,9 @@
                 tableFooter.innerHTML = `
                     <tr>
                         <td class="p-3">Tổng cộng</td>
+                        <td class="p-3"></td>
                         <td class="p-3 text-right">${formatCurrency(totalInitialValue)}</td>
+                        <td class="p-3"></td>
                         <td class="p-3 text-right">${formatCurrency(totalCurrentValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(totalDiff)}</td>
                         <td class="p-3 text-right"></td>
@@ -560,7 +586,7 @@
                 }
                 detailsDiv.classList.remove('hidden');
 
-                const stockData = portfolioData.filter(item => item.stock === selectedStock);
+                const stockData = calculatedData.filter(item => item.stock === selectedStock);
                 
                 document.getElementById('stock-chart-title').textContent = `Phân bổ nắm giữ ${selectedStock} theo Công ty`;
                 document.getElementById('stock-table-title').textContent = `Bảng Chi tiết nắm giữ ${selectedStock}`;
@@ -608,7 +634,9 @@
                     totalDiff += item.diff;
                     const row = `<tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="p-3 font-semibold">${item.company}</td>
+                        <td class="p-3 text-right">${formatStockPrice(item.price_30_06)} VND</td>
                         <td class="p-3 text-right">${formatCurrency(item.initialValue)}</td>
+                        <td class="p-3 text-right">${formatStockPrice(item.price_current)} VND</td>
                         <td class="p-3 text-right">${formatCurrency(item.currentValue)}</td>
                         <td class="p-3 text-right ${item.diff >= 0 ? 'text-green-600' : 'text-red-600'}">${formatCurrency(item.diff)}</td>
                         <td class="p-3 text-right font-medium ${item.change >= 0 ? 'text-green-600' : 'text-red-600'}">${item.change.toFixed(2)}%</td>
@@ -619,7 +647,9 @@
                 tableFooter.innerHTML = `
                     <tr>
                         <td class="p-3">Tổng cộng</td>
+                        <td class="p-3"></td>
                         <td class="p-3 text-right">${formatCurrency(totalInitialValue)}</td>
+                        <td class="p-3"></td>
                         <td class="p-3 text-right">${formatCurrency(totalCurrentValue)}</td>
                         <td class="p-3 text-right">${formatCurrency(totalDiff)}</td>
                         <td class="p-3 text-right"></td>
